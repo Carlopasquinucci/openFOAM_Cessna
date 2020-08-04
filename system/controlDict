@@ -1,0 +1,99 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         60;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   5;
+
+purgeWrite      4;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+// ************************************************************************* //
+
+functions
+{ #includeFunc residuals
+
+domainminandmax
+{
+    type fieldMinMax;
+    //type banana;
+
+    functionObjectLibs ("libfieldFunctionObjects.so");
+
+    enabled true;
+
+    mode component;
+
+    writeControl timeStep;
+    writeInterval 1;
+
+    log true;
+
+    fields (p U k epsilon);
+}
+
+/////
+
+forcesbody
+{
+    type forces;
+    functionObjectLibs ("libforces.so");
+
+    //outputControl outputTime;
+    writeControl   timeStep;
+    writeInterval  1;
+
+    //// Patches to sample
+    patches ("cessna");
+
+    //// Name of fields
+    pName p;
+    Uname U;
+
+    //// Density
+    rho rhoInf;
+    rhoInf 1.225;
+
+    //// Centre of rotation
+    CofR (0 0 0);
+}
+
+/////
+
+};

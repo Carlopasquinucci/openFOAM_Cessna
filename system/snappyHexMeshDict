@@ -1,0 +1,246 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Which of the steps to run
+castellatedMesh true;
+snap            true;
+addLayers       true;
+
+geometry
+{
+    surfacemesh_scaled.stl
+    {
+        type triSurfaceMesh;
+        name cessna;
+    }
+
+    refinementBox 
+    { 
+        type searchableBox;
+        min (-30 -20 -15); 
+        max ( 60  20 15); 
+    }
+    refinementBox2
+    { 
+        type searchableBox;
+        min (-60 -40 -30); 
+        max ( 120  40 30); 
+    }
+
+};
+
+// Settings for the castellatedMesh generation.
+castellatedMeshControls
+{
+
+    // Refinement parameters
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    maxLocalCells 1000000;
+    maxGlobalCells 5000000;
+    minRefinementCells 100;
+    maxLoadUnbalance 0.10;
+    nCellsBetweenLevels 2;
+
+    // Explicit feature edge refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    features
+    (
+        {
+            file "surfacemesh_scaled.eMesh";
+            //level 0;
+            level 8;		//Is equivalent to levels  ((0 8));
+            //levels ((8 8));	
+        }
+    );
+
+    // Surface based refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    refinementSurfaces
+    {
+        cessna
+        {
+            //level (2 4);
+            //level (6 6);
+            level (6 8);
+        }
+    }
+
+    // Resolve sharp angles
+    resolveFeatureAngle 30;
+    planarAngle 30;
+
+    // Region-wise refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    refinementRegions
+    {
+
+        refinementBox
+        {
+/*
+            mode distance;
+            levels ((1E15 3));
+*/
+            mode inside;
+            levels ((1E15 5));
+        }
+       refinementBox2
+{
+/*
+            mode distance;
+            levels ((1E15 3));
+*/
+            mode inside;
+            levels ((1E15 3));
+        }
+    }
+
+    // Mesh selection
+    // ~~~~~~~~~~~~~~
+
+    locationInMesh (-10 0 0);
+
+    allowFreeStandingZoneFaces true;//to remove in version 1.6-ext
+
+}
+
+// Settings for the snapping.
+snapControls
+{
+    nSmoothPatch 3;
+    //nSmoothPatch 10;
+
+    tolerance 2.0;
+
+    //nSolveIter 30;
+    nSolveIter 10;
+
+    nRelaxIter 5;
+    //nRelaxIter 5;
+
+    // Feature snapping
+        nFeatureSnapIter 10;
+
+        implicitFeatureSnap false;
+
+        explicitFeatureSnap true;
+
+        multiRegionFeatureSnap false;
+
+    // wip: disable snapping to opposite near surfaces (revert to 22x behaviour)
+    // detectNearSurfacesSnap false;
+}
+
+// Settings for the layer addition.
+addLayersControls
+{
+    relativeSizes true;
+
+    // Per final patch (so not geometry!) the layer information
+    layers
+    {
+        cessna
+        {
+            nSurfaceLayers 3;
+        }
+    }
+
+    // Expansion factor for layer mesh
+    expansionRatio 1.2;
+    finalLayerThickness 0.8;
+    minThickness 0.001;
+
+    // Advanced settings
+
+    featureAngle 130;
+    slipFeatureAngle 30;
+
+    nLayerIter	20;
+    nRelaxedIter 10;
+    nRelaxIter 5;
+
+    nGrow 0;
+
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+
+    minMedianAxisAngle 90;
+    nMedialAxisIter 10;
+
+    nBufferCellsNoExtrude 0;
+}
+
+// Generic mesh quality settings. At any undoable phase these determine
+// where to undo.
+meshQualityControls
+{
+    // Specify mesh quality constraints in separate dictionary so can
+    // be reused (e.g. checkMesh -meshQuality)
+    #include "meshQualityDict"
+
+    // Optional : some meshing phases allow usage of relaxed rules.
+    // See e.g. addLayersControls::nRelaxedIter.
+    relaxed
+    {
+        // Maximum non-orthogonality allowed. Set to 180 to disable.
+        maxNonOrtho 75;
+    }
+
+    // Advanced
+
+        // Number of error distribution iterations
+        nSmoothScale 4;
+        // amount to scale back displacement at error points
+        errorReduction 0.75;
+
+    //minFlatness 0.5;
+}
+
+// Advanced
+debug 0;
+//debug 3;
+
+//// Debug flags
+/*
+debugFlags
+(
+    mesh            // write intermediate meshes
+    intersections   // write current mesh intersections as .obj files
+    featureSeeds    // write information about explicit feature edge
+                    // refinement
+    attraction      // write attraction as .obj files
+    layerInfo       // write information about layers
+);
+*/
+
+//// Write flags
+
+writeFlags
+(
+    scalarLevels    // write volScalarField with cellLevel for postprocessing
+    layerSets       // write cellSets, faceSets of faces in layer
+    layerFields     // write volScalarField for layer coverage
+);
+
+mergeTolerance 1e-6;
+
+// ************************************************************************* //
