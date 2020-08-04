@@ -2,10 +2,14 @@
 Cessna simulation - openFOAM Tutorial
 
 
+![Immagine](https://user-images.githubusercontent.com/54579322/89345594-ff571100-d6a7-11ea-9463-a8a755756ffb.png)
+
+
+![Immagine2](https://user-images.githubusercontent.com/54579322/89345612-07af4c00-d6a8-11ea-8d96-f133e64930bd.png)
 
 How to run me:
 
-
+Extract the geometry file
 
 #To clean the directory, this is optional
 
@@ -55,38 +59,3 @@ simpleFoam -postProcess -func Q -latestTime
 
 paraFoam 
 
-
-
-
-
-NOTE1:
-Geometry generated using OpenVSP
-
-
-NOTE2:
-To compute k
-
-    k = 3/2 * (U I)^2
-
-    where U is the freestream velocity and I is the turbulence intensity
-
-
-To compute epsilon
-
-    epsilon = (C_mu rho kappa^2 / mu)*(eddy_viscosity_tatio)^-1
-
-    where C_mu = 0.009 (turbulence model constant), rho is the freestream density, mu is the
-    dynamic viscosity nad eddy_viscosity_ratio is equal to mu_t/mu
-
-In this case I = 1% and mu_t/mu = 5
-
-This case tends to diverge with the turbulence model on from the begining of the simulation
-To stabilize turbulence variable play with the URF
-
-
-mu_t/mu = eddy_viscosity_ratio	
-Usually a value between 1 and 10.  Choose 5 is you want to play it safe.
-
-To consider: 
-
-k at the wall is zero (by definition).
